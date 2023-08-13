@@ -1,0 +1,13 @@
+--- !Config
+languageEngine:
+  # https://huggingface.co/models?search=nllb
+  model: "facebook/nllb-200-distilled-600M"
+  # https://github.com/facebookresearch/flores/tree/main/flores200#languages-in-flores-200
+  srcLang: "eng_Latn"
+  tgtLang: "spa_Latn"
+  maxLength: 50
+
+translator:
+  tgtFolder: "./input"
+  destFolder: "./output"
+
