@@ -1,14 +1,12 @@
-from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 from tqdm import tqdm
 import srt
 import os
 
-from config import GetConfig, Config
+from config.config import GetConfig, GetEngine, Config
 from engine.engine import Engine
-from engine.nllb import NllbEngine
 
 def DoTranslate(c: Config, engine: Engine):
-    files = os.listdir(c.tgtFolder)
+    files = os.listdir(c.srcFolder)
     with tqdm(total=len(files)) as fbar:
         for filename in files:
             try:
@@ -16,7 +14,7 @@ def DoTranslate(c: Config, engine: Engine):
                 if not filename.endswith(".srt"):
                     continue
                 parsedSrt = None
-                with open(os.path.join(c.tgtFolder, filename)) as inp:
+                with open(os.path.join(c.srcFolder, filename)) as inp:
                     parsedSrt = list(srt.parse(inp.read()))
 
                 if parsedSrt is None:
@@ -25,7 +23,7 @@ def DoTranslate(c: Config, engine: Engine):
 
                 for entry in tqdm(parsedSrt, desc="translating"):
                     entry.content = engine.Translate(entry.content)
-                with open(os.path.join(c.destFolder, filename), "w") as out:
+                with open(os.path.join(c.tgtFolder, filename), "w") as out:
                     out.write(srt.compose(parsedSrt))
             except Exception as e:
                 print(f"Error occurred {e} on file {filename}")
@@ -36,6 +34,8 @@ if __name__ == "__main__":
     config = GetConfig()
     if config is None:
         raise SystemExit()
-    engine = NllbEngine(config)
+    engine = GetEngine(config)
+    if engine is None:
+        raise SystemExit()
     DoTranslate(config, engine)
 

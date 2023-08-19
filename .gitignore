@@ -1,6 +1,8 @@
+.vscode/
 input/
 output/
 config.yaml
+sub-translator-395803-c0eff453c30d.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
