@@ -1,3 +1,5 @@
+import asyncio
+from time import sleep
 from tqdm import tqdm
 import srt
 import os
@@ -5,7 +7,7 @@ import os
 from config.config import GetConfig, GetEngine, Config
 from engine.engine import Engine
 
-def DoTranslate(c: Config, engine: Engine):
+async def DoTranslate(c: Config, engine: Engine):
     files = os.listdir(c.srcFolder)
     with tqdm(total=len(files)) as fbar:
         for filename in files:
@@ -20,9 +22,15 @@ def DoTranslate(c: Config, engine: Engine):
                 if parsedSrt is None:
                     print(f"Failed to parse {filename}")
                     continue
+                
+                async def _translate(s: srt.Subtitle):
+                    s.content = engine.Translate(s.content)
+                    return s
+                jobs = [_translate(s) for s in parsedSrt]
+                for job in tqdm(asyncio.as_completed(jobs), desc="translating"):
+                    result = await job
+                    parsedSrt[result.index-1] = result
 
-                for entry in tqdm(parsedSrt, desc="translating"):
-                    entry.content = engine.Translate(entry.content)
                 with open(os.path.join(c.tgtFolder, filename), "w") as out:
                     out.write(srt.compose(parsedSrt))
             except Exception as e:
@@ -37,5 +45,5 @@ if __name__ == "__main__":
     engine = GetEngine(config)
     if engine is None:
         raise SystemExit()
-    DoTranslate(config, engine)
+    asyncio.run(DoTranslate(config, engine))
 
