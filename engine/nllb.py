@@ -1,13 +1,12 @@
 
 from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
 
-from config.config import Config
 from engine.engine import Engine
 
 class NllbEngine(Engine):
     translator: Pipeline
 
-    def __init__(self, c: Config) -> None:
+    def __init__(self, c) -> None:
         ec = c.engine.engine_configs
         tokenizer = AutoTokenizer.from_pretrained(ec["model"])
         model = AutoModelForSeq2SeqLM.from_pretrained(ec["model"])

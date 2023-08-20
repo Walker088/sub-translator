@@ -28,7 +28,7 @@ def DoTranslate(c: Config, engine: Engine):
             except Exception as e:
                 print(f"Error occurred {e} on file {filename}")
             finally:
-                fbar.update(1/len(files))
+                fbar.update(1)
 
 if __name__ == "__main__":
     config = GetConfig()
