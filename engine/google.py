@@ -2,6 +2,7 @@ from engine.engine import Engine
 
 from google.cloud import translate_v2 as translate
 from google.cloud.translate_v2 import Client
+from srt import Subtitle
 import os
 
 class GoogleTranslateEngine(Engine):
@@ -20,3 +21,6 @@ class GoogleTranslateEngine(Engine):
             target_language=self.tgt_lang
         )
         return result["translatedText"]
+    
+    def TranslateList(self, queries: list[Subtitle]) -> list[Subtitle]:
+        return []

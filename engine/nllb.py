@@ -1,5 +1,8 @@
 
+import torch
 from transformers import pipeline, Pipeline, AutoTokenizer, AutoModelForSeq2SeqLM
+from tqdm import tqdm
+from srt import Subtitle
 
 from engine.engine import Engine
 
@@ -10,8 +13,14 @@ class NllbEngine(Engine):
         ec = c.engine.engine_configs
         tokenizer = AutoTokenizer.from_pretrained(ec["model"])
         model = AutoModelForSeq2SeqLM.from_pretrained(ec["model"])
+        
+        device = -1
+        if (torch.cuda.is_available()):
+            device = torch.cuda.current_device()
+        
         self.translator = pipeline(
             "translation",
+            device=device,
             model=model,
             tokenizer=tokenizer,
             src_lang=ec["srcLang"],
@@ -20,9 +29,19 @@ class NllbEngine(Engine):
         )
 
     def Translate(self, query:str) -> str:
-        #regex = re.compile(r"([\w|\[, '-]*[?|.|!|\]])|(♪[\w|, ']*♪*)")
-        #matches = regex.finditer(query.replace("\n", " "))
-        #cleaned = [match.group(0).strip() for match in matches]
-        #translated = [self.translator(s)[0]["translation_text"] for s in cleaned]
-        #return "\n".join(translated)
         return self.translator(query)[0]["translation_text"] # type: ignore
+    
+    def TranslateList(self, queries: list[Subtitle]) -> list[Subtitle]:
+        st_idx = 0
+        res = queries.copy()
+        stream = (sub.content for sub in queries)
+
+        for result in tqdm(self.translator(stream, batch_size=1), total=len(queries)):
+            #if (type(result) is list):
+            #    translated = result[0]["translation_text"]
+            #    res[st_idx].content = translated
+            #    st_idx += 1
+            translated = result[0]["translation_text"] # type: ignore
+            res[st_idx].content = translated
+            st_idx += 1
+        return res
