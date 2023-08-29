@@ -7,6 +7,9 @@
 ### Ensure you got python and pipenv installed
 ### To install pipenv, check out 
 ### https://pipenv.pypa.io/en/latest/installation/
+### Moreover, it's recommmended using pyenv to have
+### multiple python in your machine.
+### https://github.com/pyenv/pyenv
 
 # 2. Project configuration
 ### Please check out the config.example.yaml file.
@@ -18,6 +21,8 @@
 
 $ cp ./config.example.yaml ./config.yaml
 $ pipenv shell
+# The download process might take a while, use
+# "pipenv install --verbose" to see more detailes
 $ pipenv install
 $ python3 ./main.py
 ```
